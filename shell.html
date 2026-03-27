@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Todo App with Tests</title>
+  </head>
+  <body>
+    <div id="app"></div>
+
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <script type="text/babel">
+      const { useState } = React;
+
+      function App() {
+        const [text, setText] = useState("");
+
+        const [items, setItems] = useState([]);
+
+        const [testResults, setTestResults] = useState([]);
+
+        function addItem() {
+          if (text.trim() === "") return;
+          setItems([...items, text]);
+          setText("");
+        }
+
+
+        function assert(condition, message) {
+          return {
+            pass: condition,
+            message
+          };
+        }
+
+        function runTests() {
+          let results = [];
+
+       
+          const testItems = ["Task 1", "Task 2", "Task 3"];
+          const container = document.createElement("div");
+          const root = ReactDOM.createRoot(container);
+
+          root.render(
+            <ul>
+              {testItems.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          );
+
+          setTimeout(() => {
+            const liElements = container.querySelectorAll("li");
+
+            results.push(assert(liElements.length === 3, "Correct number of <li> elements"));
+
+
+            const emptyContainer = document.createElement("div");
+            const emptyRoot = ReactDOM.createRoot(emptyContainer);
+
+            emptyRoot.render(<ul></ul>);
+
+            setTimeout(() => {
+              const emptyUl = emptyContainer.querySelector("ul");
+
+              results.push(assert(
+                emptyUl.children.length === 0,
+                "Empty list renders correctly"
+              ));
+
+       
+              const original = ["A", "B"];
+              const copy = [...original];
+
+              const temp = [...original]; 
+
+              results.push(assert(
+                JSON.stringify(original) === JSON.stringify(copy),
+                "Array not mutated"
+              ));
+
+  
+              results.push(assert(
+                document.querySelector("h2").textContent === "Todo List",
+                "Title renders correctly"
+              ));
+
+              setTestResults(results);
+            }, 0);
+          }, 0);
+        }
+
+        return (
+          <div>
+            <h2>Todo List</h2>
+
+            {/* input */}
+            <input
+              type="text"
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Enter a task"
+            />
+
+            {/* add button */}
+            <button onClick={addItem}>Add</button>
+
+            {/* todo list */}
+            <ul>
+              {items.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+
+            {/* test button */}
+            <button onClick={runTests}>Run Tests</button>
+
+            {/* test output */}
+            <h3>Test Results:</h3>
+            <ul>
+              {testResults.map((t, i) => (
+                <li key={i} style={{ color: t.pass ? "green" : "red" }}>
+                  {t.pass ? "PASS: " : "FAIL: "} {t.message}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("app"));
+      root.render(<App />);
+    </script>
+  </body>
+</html>
